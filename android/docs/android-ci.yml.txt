@@ -1,0 +1,66 @@
+SALINAN FILE WORKFLOW CI
+========================
+File ini tidak bisa diunggah oleh integrasi GitHub (izin workflows ditolak API),
+jadi buat manual lewat web GitHub:
+1. Buka repo Rafigibran/Spacetify, pindah ke branch android.
+2. Add file, Create new file, nama: .github/workflows/android-ci.yml
+3. Tempel isi di bawah garis ini, lalu Commit.
+------------------------
+name: Android CI
+
+# The Android port lives on the `android` branch of this repository, in the
+# android/ folder. The desktop code stays untouched on main.
+on:
+  push:
+    branches: [android]
+  pull_request:
+    branches: [android]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Generate Gradle wrapper (if missing)
+        run: |
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            gradle wrapper --gradle-version 8.7
+          fi
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build release APK (debug-signed, configured in app/build.gradle.kts)
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacetify-android-apk
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
