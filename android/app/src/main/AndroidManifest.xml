@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Package visibility for detecting the Spotify app (desktop: FindAppPath). -->
+    <queries>
+        <package android:name="com.spotify.music" />
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Spacetify">
+
+        <!-- Xposed / LSPosed module metadata. The same APK is both the
+             manager app and the module, like LSPatch expects. -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="93" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.TrashbinActivity"
+            android:exported="false"
+            android:label="TrashBin" />
+        <activity
+            android:name=".ui.BookmarksActivity"
+            android:exported="false"
+            android:label="Bookmark" />
+        <activity
+            android:name=".ui.LyricsActivity"
+            android:exported="false"
+            android:label="Lirik" />
+        <activity
+            android:name=".ui.GuideActivity"
+            android:exported="false"
+            android:label="Panduan Instalasi" />
+
+        <!-- Configuration channel read by the module inside Spotify. -->
+        <provider
+            android:name=".config.ConfigProvider"
+            android:authorities="com.wizardnative.spacetify.config"
+            android:exported="true" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.wizardnative.spacetify.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>
